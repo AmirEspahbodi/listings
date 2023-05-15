@@ -1,5 +1,6 @@
-from app.db.database import Base, get_db
+from app.db.database import Base
 from app.main import app
+from app.apis.deps import get_db
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine

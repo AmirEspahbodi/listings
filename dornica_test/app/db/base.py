@@ -1,3 +1,3 @@
 from app.db.database import Base
-from app.db.models.listing import Listing
-from app.db.models.user import User
+from app.models.listing import Listing
+from app.models.user import User

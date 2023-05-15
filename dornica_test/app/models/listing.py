@@ -1,8 +1,13 @@
+import enum
 from sqlalchemy import Column, String, DateTime, Enum, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 
-from app.db.models.enum_types import ListingTypeEnum
 from app.db.database import Base
+
+class ListingTypeEnum(enum.Enum):
+    HOUSE = 'HOUSE'
+    APARTMENT = 'APARTMENT'
+
 
 class Listing(Base):
     __tablename__ = 'listings'
@@ -15,4 +20,4 @@ class Listing(Base):
     updated_at = Column(DateTime, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"))
     
-    owner = relationship('app.db.models.user.User', back_populates='listings')
+    owner = relationship('User', back_populates='listings')

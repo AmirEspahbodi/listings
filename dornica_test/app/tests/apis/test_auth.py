@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from app.tests.override import TestingSessionLocal
-from app.tests.utils.utils import get_serializable_random_user, random_email
+from app.tests.utils import get_serializable_random_user, random_email
 from app.main import app
 from app.crud.user import get_user_by_email
 
@@ -35,7 +35,7 @@ def test_register_existing_username_email():
     )
     db.close()
     assert response.status_code == 201
-    assert response_exising_username.status_code == 406
+    assert response_exising_username.status_code == 400
 
 
 def test_login():
@@ -47,15 +47,20 @@ def test_login():
     )
     login_response = client.post(
         "/auth/token/",
-        json={
+        data={
             'username': user_in['username'],
-            'email':    user_in['email'],
             'password': user_in['password1']
         }
     )
     db.close()
     assert response.status_code==201
     assert login_response.status_code==200
+    
+    tokens = login_response.json()
+    assert "access_token" in tokens
+    assert tokens["access_token"]
+    assert "refresh_token" in tokens
+    assert tokens["refresh_token"]
 
 
 def test_no_login():
@@ -67,12 +72,13 @@ def test_no_login():
     )
     login_response = client.post(
         "/auth/token/",
-        json={
+        data={
             'username': user_in['username'],
-            'email':    user_in['email'],
             'password': user_in['password1']+' fake'
         }
     )
     db.close()
     assert response.status_code==201
     assert login_response.status_code==401
+
+test_login()

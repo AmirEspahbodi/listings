@@ -2,12 +2,12 @@ import random
 import string
 from datetime import date
 
-from app.schemas.user import UserCreateSchema
-from app.db.models.enum_types import GenderEnum
+from app.schemas import UserCreateSchema
+from app.models.user import GenderEnum
+
 
 def random_lower_string() -> str:
     return "".join(random.choices(string.ascii_lowercase, k=32))
-
 
 def random_email() -> str:
     return f"{random_lower_string()}@{random_lower_string()}.com"

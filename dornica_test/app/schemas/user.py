@@ -1,9 +1,6 @@
-from datetime import date, datetime
-
-from pydantic import BaseModel, constr, EmailStr, ValidationError, root_validator
-
-from app.schemas.listing import Listing
-from app.db.models.enum_types import GenderEnum
+from datetime import date
+from pydantic import BaseModel, constr, EmailStr, root_validator
+from app.models.user import GenderEnum
 
 
 class UserBaseSchema(BaseModel):
@@ -27,8 +24,6 @@ class UserCreateSchema(UserBaseSchema):
  
 class UserSchema(UserBaseSchema):
     id: int
-    is_active: bool
-    listings: list[Listing] = []
 
     class Config:
         orm_mode = True
@@ -39,6 +34,5 @@ class UserCreateResponseSchema(BaseModel):
     updated_at: str
 
 class UserLoginSchema(BaseModel):
-    username: str|None = None
-    email: EmailStr|None = None
+    username: str 
     password: str

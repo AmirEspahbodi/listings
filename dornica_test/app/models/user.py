@@ -1,9 +1,14 @@
+import enum
+
 from sqlalchemy import Column, String, Date, Enum, Integer, TIMESTAMP
 from sqlalchemy.orm import relationship
 
-from app.db.models.enum_types import GenderEnum
 from app.db.database import Base
 
+class GenderEnum(enum.Enum):
+    MAIL = 'MAIL'
+    FEMAIL = 'FEMAIL'
+    NOT_SPECIFIED = 'NOT_SPECIFIED'
 
 class User(Base):
     __tablename__ = 'users'
