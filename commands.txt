@@ -1,0 +1,9 @@
+# on dornica_test directory
+
+alembic revision --autogenerate -m "New Migration"
+alembic upgrade head
+
+
+# tests
+# python -m app.tests.crud.test_user
+python -m pytest app/tests/

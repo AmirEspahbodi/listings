@@ -1,0 +1,12 @@
+fastapi
+pydantic[email]
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+passlib[bcrypt]
+fastapi-jwt-auth[asymmetric]
+python-dotenv
+alembic
+pytest
+httpx
+python-jose[cryptography]
