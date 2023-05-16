@@ -18,6 +18,9 @@ class Settings(BaseSettings):
 
     CLIENT_ORIGIN: str
 
+    DB_EMAIL_UNIQUE: bool
+    AUTH_ROUTE_PREFIX: str
+    
     class Config:
         env_file = '../.env'
 

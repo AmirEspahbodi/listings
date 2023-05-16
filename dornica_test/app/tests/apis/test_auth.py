@@ -1,58 +1,56 @@
 from fastapi.testclient import TestClient
 
-from app.tests.override import TestingSessionLocal
-from app.tests.utils import get_serializable_random_user, random_email
+from app.tests.utils.override import TestingSessionLocal
+from app.tests.utils.user import  user_authentication_headers, get_random_user_update, get_random_user
+from app.core.config import settings
+from app.tests.utils.utils import random_lower_string
+
 from app.main import app
-from app.crud.user import get_user_by_email
+from app.crud.user import user_crud
 
 client = TestClient(app)
 
 
 def test_register():
     db = TestingSessionLocal()
-    user_in = get_serializable_random_user()
+    user_in = get_random_user()
     response = client.post(
-        "/auth/register/",
-        json=user_in
+        f"{settings.AUTH_ROUTE_PREFIX}/register/",
+        content=user_in.json()
     )
+    user_db = user_crud.get_user(db, username=user_in.username)
     db.close()
-    user_db = get_user_by_email(db, user_in['email'])
     assert response.status_code == 201
-    assert user_db.username == user_in['username']
+    assert user_db.email == user_in.email
 
-
-def test_register_existing_username_email():
-    db = TestingSessionLocal()
-    user_in = get_serializable_random_user()
+def test_register_existing_username():
+    user_in = get_random_user()
     response = client.post(
-        "/auth/register/",
-        json=user_in
+        f"{settings.AUTH_ROUTE_PREFIX}/register/",
+        content=user_in.json()
     )
-    user_in['email'] = random_email()
+    new_user_in = get_random_user()
+    new_user_in.username = user_in.username
     response_exising_username = client.post(
-        "/auth/register/",
-        json=user_in
+        f"{settings.AUTH_ROUTE_PREFIX}/register/",
+        content=user_in.json()
     )
-    db.close()
     assert response.status_code == 201
     assert response_exising_username.status_code == 400
 
-
 def test_login():
-    db = TestingSessionLocal()
-    user_in = get_serializable_random_user()
+    user_in = get_random_user()
     response = client.post(
-        "/auth/register/",
-        json=user_in
+        f"{settings.AUTH_ROUTE_PREFIX}/register/",
+        content=user_in.json()
     )
     login_response = client.post(
-        "/auth/token/",
+        f"{settings.AUTH_ROUTE_PREFIX}/token/",
         data={
-            'username': user_in['username'],
-            'password': user_in['password1']
+            'username': user_in.username,
+            'password': user_in.password1
         }
     )
-    db.close()
     assert response.status_code==201
     assert login_response.status_code==200
     
@@ -64,21 +62,91 @@ def test_login():
 
 
 def test_no_login():
-    db = TestingSessionLocal()
-    user_in = get_serializable_random_user()
+    user_in = get_random_user()
     response = client.post(
-        "/auth/register/",
-        json=user_in
+        f"{settings.AUTH_ROUTE_PREFIX}/register/",
+        content=user_in.json()
     )
     login_response = client.post(
-        "/auth/token/",
+        f"{settings.AUTH_ROUTE_PREFIX}/token/",
         data={
-            'username': user_in['username'],
-            'password': user_in['password1']+' fake'
+            'username': user_in.username,
+            'password': user_in.password1+' fake'
         }
     )
-    db.close()
     assert response.status_code==201
     assert login_response.status_code==401
 
-test_login()
+
+def test_read_users_me():
+    user_in = get_random_user()
+    response = client.post(
+        f"{settings.AUTH_ROUTE_PREFIX}/register/",
+        content=user_in.json()
+    )
+    headers = user_authentication_headers(client=client, username=user_in.username, password=user_in.password1)
+    response = client.get(
+        f"{settings.AUTH_ROUTE_PREFIX}/me/@{user_in.username}/",
+        headers=headers
+    )
+    assert response.status_code==200
+
+
+def test_read_users_access_denied():
+    user_in1 = get_random_user()
+    response = client.post(
+        f"{settings.AUTH_ROUTE_PREFIX}/register/",
+        content=user_in1.json()
+    )
+    user_in2 = get_random_user()
+    response = client.post(
+        f"{settings.AUTH_ROUTE_PREFIX}/register/",
+        content=user_in2.json()
+    )
+    headers = user_authentication_headers(client=client, username=user_in1.username, password=user_in1.password1)
+    response = client.get(
+        f"{settings.AUTH_ROUTE_PREFIX}/me/@{user_in2.username}/",
+        headers=headers
+    )
+    assert response.status_code==403
+
+
+def test_read_users_not_authenticated():
+    user_in = get_random_user()
+    register_response = client.post(
+        f"{settings.AUTH_ROUTE_PREFIX}/register/",
+        content=user_in.json()
+    )
+    response = client.get(
+        f"{settings.AUTH_ROUTE_PREFIX}/me/@{user_in.username}/",
+    )
+    assert response.status_code==401
+    assert register_response.status_code==201
+
+
+def test_update_user_information():
+    db = TestingSessionLocal()
+    
+    user_in = get_random_user()
+    register_response = client.post(
+        f"{settings.AUTH_ROUTE_PREFIX}/register/",
+        content=user_in.json()
+    )
+
+    headers = user_authentication_headers(client=client, username=user_in.username, password=user_in.password1)
+    user_in_update = get_random_user_update()
+    put_response = client.put(
+        f"{settings.AUTH_ROUTE_PREFIX}/me/@{user_in.username}/",
+        headers=headers,
+        content=user_in_update.json()
+    )
+    
+    db_user_updated = user_crud.get_user(db, username=user_in_update.username)
+
+    db.close()
+    
+    assert register_response.status_code == 201
+    assert put_response.status_code == 200
+    assert db_user_updated.full_name == user_in_update.full_name
+    assert db_user_updated.username == user_in_update.username
+    assert db_user_updated.email == user_in_update.email
