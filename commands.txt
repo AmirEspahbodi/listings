@@ -4,6 +4,9 @@ sudo docker-compose up -d
 # go to 0.0.0.0:5050
 # create server name:postgres, password:postgres, host_address:pgsql-server, post:5432, Maintenance:postgres, Username:admin, Password:secret
 # create database dornica1 with password postgres
-# new run following commands for migration and user registeration
+# new run following commands for 
+# migration and user registeration
+# tests
 
 sudo docker-compose exec web python3 -m scripts.on_start
+sudo docker-compose exec web python3 -m pytest app/tests/
