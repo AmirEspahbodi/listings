@@ -1,9 +1,9 @@
-# on dornica_test directory
+sudo docker build .
+sudo docker-compose up -d
 
-alembic revision --autogenerate -m "New Migration"
-alembic upgrade head
+# go to 0.0.0.0:5050
+# create server name:postgres, password:postgres, host_address:pgsql-server, post:5432, Maintenance:postgres, Username:admin, Password:secret
+# create database dornica1 with password postgres
+# new run following commands for migration and user registeration
 
-
-# tests
-# python -m app.tests.crud.test_user
-python -m pytest app/tests/
+sudo docker-compose exec web python3 -m scripts.on_start

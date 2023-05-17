@@ -1,16 +1,17 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.schemas import UserCreateSchema, UserCreateResponseSchema, \
-                        UserSchema, UserUpdateSchema, UserChangePasswordSchema
+                        UserSchema, UserUpdateSchema
 from app.models import User
 from app.core.security import create_access_token
 from app.crud.user import user_crud, check_user_exist
-from app.apis.deps import get_db, get_current_related_user, get_current_user
+from app.apis.deps import get_db, get_current_related_user
 from app.core.config import settings
+from app.core.utils import successful_login_notification
 
 router = APIRouter()
 
@@ -37,9 +38,9 @@ def register(
 
 @router.post("/token", summary="Create access and refresh tokens for user", status_code=status.HTTP_200_OK)
 def token(
-        # user: UserLoginSchema,
         db: Annotated[Session, Depends(get_db)],
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        background_tasks: BackgroundTasks
     ):
     authenticated_user = user_crud.authenticate(db, username=form_data.username, password=form_data.password)
     if not authenticated_user:
@@ -47,6 +48,7 @@ def token(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='The username or password is incorrect'
         )
+    background_tasks.add_task(successful_login_notification, authenticated_user.username)
     return {
         "access_token":     create_access_token(data={"sub": authenticated_user.username}),
         "refresh_token":    create_access_token(data={"sub": authenticated_user.username}, refresh=True)

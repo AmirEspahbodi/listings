@@ -11,3 +11,4 @@ pytest
 httpx
 python-jose[cryptography]
 python-multipart
+requests

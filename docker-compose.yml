@@ -3,40 +3,49 @@ version: '3.9'
 services:
   web:
     build: .
-    command: uvicorn dornica_test.app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 3000 --reload
     volumes:
       - .:/dornica_test
     ports:
-      - 8000:8000
+      - 3000:3000
     env_file:
       - ./.env
     depends_on:
       - db
+    links:
+    - "db:pgsql-server"
+
   db:
     image: postgres:15-alpine
     container_name: postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    expose:
-      - 5432
-    # ports:
-    #   - '5432:5432'
     restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+    - postgres_data:/var/lib/postgresql/data
+    ports:
+    - "8080:5432"
     env_file:
       - ./.env
-    # environment:
-    #   - POSTGRES_USER=postgres
-    #   - POSTGRES_PASSWORD=postgres
-    #   - POSTGRES_DB=db
+
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
+    restart: always
     environment:
       - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
       - PGADMIN_DEFAULT_PASSWORD=admin
     ports:
       - "5050:80"
+    volumes:
+    - pgadmin-data:/var/lib/pgadmin
     depends_on:
       - db
+    links:
+    - "db:pgsql-server"
 volumes:
   postgres_data:
+  pgadmin-data:

@@ -1,8 +1,15 @@
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from starlette.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
 from app.apis.api import api_router
+from app.core.utils import increase_count_file
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    increase_count_file()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 
 app.add_middleware(
