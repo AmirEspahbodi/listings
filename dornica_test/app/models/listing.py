@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 
 from app.db.database import Base
 
+
 class ListingTypeEnum(enum.Enum):
     HOUSE = 'HOUSE'
     APARTMENT = 'APARTMENT'

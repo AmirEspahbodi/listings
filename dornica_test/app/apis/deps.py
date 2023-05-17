@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.db.database import SessionLocal
 from app.schemas import TokenData
 from app.crud.user import user_crud
+from app.crud.listing import listing_crud
 from app.models import User
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -44,6 +45,7 @@ async def get_current_user(
         raise credentials_exception
     return user
 
+
 async def get_current_related_user(
     username:str,
     current_user: Annotated[User, Depends(get_current_user)]
@@ -54,3 +56,17 @@ async def get_current_related_user(
             detail='access denied!'
         )
     return current_user
+
+
+async def get_current_related_user_listing(
+    listing_id:int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)]
+):
+    listing = listing_crud.get(db, listing_id)
+    if (listing.owner_id != current_user.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='access denied!'
+        )
+    return current_user, listing

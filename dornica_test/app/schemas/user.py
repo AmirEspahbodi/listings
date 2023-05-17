@@ -11,6 +11,12 @@ class UserBaseSchema(BaseModel):
     BoD: date
 
 
+class FullUserSchema(UserBaseSchema):
+    password: constr(min_length=8)
+    created_at: datetime
+    updated_at: datetime
+
+
 class UserCreateSchema(UserBaseSchema):
     password1: constr(min_length=8)
     password2: constr(min_length=8)
@@ -28,6 +34,7 @@ class UserSchema(UserBaseSchema):
     class Config:
         orm_mode = True
 
+
 class UserUpdateSchema(BaseModel):
     username: str|None = None
     full_name: str|None = None
@@ -35,6 +42,7 @@ class UserUpdateSchema(BaseModel):
     gender: GenderEnum|None = None
     password: str|None = None
     BoD: date|None = None
+
 
 class UserChangePasswordSchema(BaseModel):
     password1: constr(min_length=8)
@@ -48,5 +56,5 @@ class UserChangePasswordSchema(BaseModel):
 
 
 class UserCreateResponseSchema(BaseModel):
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime

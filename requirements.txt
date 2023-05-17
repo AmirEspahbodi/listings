@@ -10,3 +10,4 @@ alembic
 pytest
 httpx
 python-jose[cryptography]
+python-multipart

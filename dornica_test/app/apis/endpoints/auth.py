@@ -22,9 +22,10 @@ def register(
     ):
     user_existence = check_user_exist(db, username=user.username, email=user.email)
     if user_existence:
+        print(user_existence)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'there is a user with this {user_existence}'
+            detail=f"there is a user with this {user_existence['field']}"
         )  
     db_user = user_crud.create(db, obj_in=user)
     

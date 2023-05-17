@@ -6,27 +6,20 @@ from sqlalchemy.orm import Session
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.user import User
-from app.schemas import UserCreateSchema, UserUpdateSchema
+from app.schemas import UserCreateSchema, UserUpdateSchema, FullUserSchema
 from app.core.config import settings
 
 
 class CRUDUser(CRUDBase[User, UserCreateSchema, UserUpdateSchema]):
     def create(self, db: Session, *, obj_in: UserCreateSchema) -> User:
         hashed_password = get_password_hash(obj_in.password1)
-        db_user = User(
-            full_name=obj_in.full_name,
-            username=obj_in.username,
-            email=obj_in.email,
+        fullUserSchema = FullUserSchema(
+            ** dict(filter(lambda item : item[0] not in ('password1', 'password2')  ,obj_in.dict().items())),
             password=hashed_password,
-            gender=obj_in.gender,
-            BoD=obj_in.BoD,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
+            created_at =   datetime.utcnow(),
+            updated_at =   datetime.utcnow()
         )
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-        return db_user
+        return super().create(db, obj_in=fullUserSchema)
 
     def update(self, db: Session, *, db_obj: User, obj_in: UserUpdateSchema|Dict[str, Any]) -> User:
         if isinstance(obj_in, dict):
