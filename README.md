@@ -6,7 +6,6 @@ A full-featured listings application where users can authenticate, create, edit,
 
 - **Authentication**: Secure authentication using JWT tokens.
 - **User Listings**: Users can create, edit, and delete their listings.
-- **Global Listings View**: View all listings from all users.
 - **FastAPI**: Lightning-fast Python framework for building APIs.
 - **SQLAlchemy**: ORM for database interactions.
 - **PostgreSQL**: Reliable and robust database management.
