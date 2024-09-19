@@ -27,34 +27,6 @@ A full-featured listings application where users can authenticate, create, edit,
     cd listings-app
     ```
 
-2. Set up your virtual environment:
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate
-    ```
-
-3. Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4. Set up the PostgreSQL database:
-    ```bash
-    CREATE DATABASE listings_app;
-    ```
-
-5. Configure environment variables:
-    Create a `.env` file in the project root with the following variables:
-    ```env
-    DATABASE_URL=postgresql://user:password@localhost/listings_app
-    JWT_SECRET_KEY=your-secret-key
-    ```
-
-6. Apply database migrations:
-    ```bash
-    alembic upgrade head
-    ```
-
 7. Run the application:
     ```bash
     sudo docker build .
